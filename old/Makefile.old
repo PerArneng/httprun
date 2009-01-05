@@ -1,0 +1,22 @@
+CWD=.
+SRC=$(CWD)/src
+SRC_MAIN=$(CWD)/src/main
+SRC_TEST=$(CWD)/src/test
+BIN_MAIN=target/main
+BIN_TEST=target/test
+GCC_OPTS=-Wall -pedantic -std=gnu99
+GLIB_FLAGS=$(shell pkg-config --cflags --libs gthread-2.0)
+
+
+all:
+	gcc $(GCC_OPTS) -g $(GLIB_FLAGS) -I$(SRC_MAIN) -o $(BIN_MAIN)/httpshare\
+        $(SRC_MAIN)/*.c $(SRC)/main.c 
+
+test:
+	gcc $(GCC_OPTS) -g $(GLIB_FLAGS) -I$(SRC_MAIN) -I$(SRC_TEST)\
+        -o $(BIN_TEST)/httpshare_test $(SRC_MAIN)/*.c $(SRC_TEST)/*.c\
+        $(SRC)/test_main.c
+
+$(BIN_MAIN)/*.o:
+	gcc $(GCC_OPTS) -I $(SRC_MAIN)  -o $(BIN_MAIN)/ $(SRC_MAIN)/*.c
+
