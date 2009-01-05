@@ -1,0 +1,9 @@
+httprun - by Per Arneng
+
+httprun is a commandline utillity that is used to expose a process 
+input and output streams over the http protocol. The arguments of 
+the process are given in the URL that the process is associated with.
+
+The parameters of the URL are not just limited to the query part. 
+The parameters can be anywhere in the URL in a RESTFul fashion.
+
