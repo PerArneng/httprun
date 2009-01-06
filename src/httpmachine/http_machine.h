@@ -76,7 +76,7 @@ http_machine_start(HttpMachine* this, GError** error);
 gboolean
 http_machine_destroy(HttpMachine* this, GError** error);
 
-// private:
+/* private */
 
 int
 _create_socket(uint16_t port, GError** error);

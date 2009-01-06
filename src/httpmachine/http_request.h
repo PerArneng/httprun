@@ -39,8 +39,16 @@ typedef struct {
 HttpRequest*
 http_request_new(GIOChannel* io_channel, GError** error);
 
+void
+http_request_destroy(HttpRequest* this);
+
+/* private */
+
+gchar*
+_http_request_read_request(GIOChannel* io_channel, GError** error);
+
 gboolean
-http_request_destroy(HttpRequest* this, GError** error);
+_http_request_parse_raw_request(HttpRequest* this, GError** error);
 
 
 #endif /* HTTP_REQUEST_H_ */
