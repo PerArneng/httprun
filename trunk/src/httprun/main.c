@@ -26,10 +26,11 @@ main(int argc, char** argv)
 {
 
   GError* error = NULL;
+  HttpMachine* http_machine = NULL;
 
   g_thread_init(NULL);
 
-  HttpMachine* http_machine = http_machine_new(8080, &error);
+  http_machine = http_machine_new(8080, &error);
   if (http_machine == NULL)
     {
       fprintf(stderr,"could not create the http engine: %s\n", error->message);
