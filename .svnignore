@@ -1,0 +1,14 @@
+configure
+Makefile.in
+.project
+config.log
+config.status
+.cproject
+stamp-h1
+autom4te.cache
+Makefile
+aclocal.m4
+.settings
+.deps
+config.h
+config.h.in

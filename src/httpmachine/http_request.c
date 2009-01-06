@@ -26,6 +26,7 @@ http_request_new(GIOChannel* io_channel, GError** error)
 {
 
   GError* local_error = NULL;
+  gchar* request = NULL;
 
   HttpRequest* this = malloc(sizeof(HttpRequest));
   if(this == NULL)
@@ -37,7 +38,7 @@ http_request_new(GIOChannel* io_channel, GError** error)
       return NULL;
     }
 
-  gchar* request = _http_request_read_request(io_channel, &local_error);
+  request = _http_request_read_request(io_channel, &local_error);
   if (request == NULL) {
     g_propagate_error(error, local_error);
     g_error_free(local_error);
@@ -71,6 +72,7 @@ _http_request_read_request(GIOChannel* io_channel, GError** error)
 
   gchar* request = NULL;
   GError* local_error = NULL;
+  GIOStatus status;
 
   /* get the old delimiter */
    gint old_delimiter_length;
@@ -81,8 +83,8 @@ _http_request_read_request(GIOChannel* io_channel, GError** error)
    g_io_channel_set_line_term(io_channel, "\r\n\r\n", 4);
 
    /* read the whole request as one "line" */
-   GIOStatus status = g_io_channel_read_line(io_channel, &request,
-                                             NULL, NULL, &local_error);
+   status = g_io_channel_read_line(io_channel, &request,
+                                   NULL, NULL, &local_error);
    if (status == G_IO_STATUS_ERROR)
      {
        g_propagate_error(error, local_error);
@@ -98,7 +100,7 @@ _http_request_read_request(GIOChannel* io_channel, GError** error)
        return NULL;
      }
 
-   // reset the old delimiter
+   /* reset the old delimiter */
    g_io_channel_set_line_term(io_channel,old_delimiter,old_delimiter_length);
 
 

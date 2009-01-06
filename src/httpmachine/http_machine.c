@@ -30,6 +30,13 @@
 gboolean
 http_machine_start(HttpMachine* this, GError** error)
 {
+
+  struct sockaddr_in client_addr;
+  size_t client_addr_size = -1;
+  int client_socket = -1;
+  GError* local_error = NULL;
+  HttpClientConnection* client = NULL;
+
   int retval = listen(this->socket, 100);
   if (retval < 0)
     {
@@ -39,14 +46,13 @@ http_machine_start(HttpMachine* this, GError** error)
       return FALSE;
     }
 
-  struct sockaddr_in client_addr;
-  size_t client_addr_size = sizeof(client_addr);
+  client_addr_size = sizeof(client_addr);
 
   while (1)
     {
 
-      int client_socket = accept(this->socket, (struct sockaddr*) &client_addr,
-          (socklen_t*) &client_addr_size);
+      client_socket = accept(this->socket, (struct sockaddr*) &client_addr,
+                             (socklen_t*) &client_addr_size);
       if (client_socket < 0)
         {
           g_set_error(error, HTTP_MACHINE_ERROR,
@@ -54,11 +60,10 @@ http_machine_start(HttpMachine* this, GError** error)
           return FALSE;
         }
 
-      GError* local_error = NULL;
-      HttpClientConnection* client =
-        http_client_connection_new(client_socket,
-                                   (struct sockaddr_in*)&client_addr,
-                                   &local_error);
+      local_error = NULL;
+      client = http_client_connection_new(client_socket,
+                                          (struct sockaddr_in*)&client_addr,
+                                           &local_error);
       if(client == NULL) {
         g_propagate_error(error, local_error);
         g_error_free(local_error);
@@ -77,7 +82,9 @@ _handler_thread_function(gpointer data, gpointer user_data)
 
   GError* local_error = NULL;
   HttpClientConnection* client = (HttpClientConnection*)data;
-
+  char* temp_message = NULL;
+  gsize written = -1;
+  GIOStatus status;
 
   HttpRequest* http_request = http_request_new(client->io_channel,
                                                &local_error);
@@ -90,13 +97,13 @@ _handler_thread_function(gpointer data, gpointer user_data)
 
   /* printf("%s",http_request->_raw_request); */
 
-  char* temp_message = "HTTP/1.0 200 OK\r\nConnection: close\r\n\r\n"
+  temp_message = "HTTP/1.0 200 OK\r\nConnection: close\r\n\r\n"
     "<html><body style='background-color: blue;'><h1 style='color: white;'>"
     "Hello, World!</h1></body></html>";
-  gsize written;
-  GIOStatus status = g_io_channel_write_chars(client->io_channel, temp_message,
-                                              strlen(temp_message),
-                                              &written, &local_error);
+
+  status = g_io_channel_write_chars(client->io_channel, temp_message,
+                                    strlen(temp_message),
+                                    &written, &local_error);
   if(status != G_IO_STATUS_NORMAL)
     {
       fprintf(stderr,"failed to write: %s\n",local_error->message);
@@ -131,7 +138,7 @@ _create_socket(uint16_t port, GError** error)
   int sock = -1;
   struct sockaddr_in name;
 
-  // create the socket
+  /* create the socket */
   sock = socket(PF_INET,SOCK_STREAM, 0);
   if (sock < 0)
     {
@@ -141,7 +148,7 @@ _create_socket(uint16_t port, GError** error)
       return -1;
     }
 
-  // Give the socket a name
+  /* Give the socket a name */
   name.sin_family = AF_INET;
   name.sin_port = htons(port);
   name.sin_addr.s_addr = htonl(INADDR_ANY);
