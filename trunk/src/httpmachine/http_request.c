@@ -18,6 +18,7 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include "http_request.h"
 
 HttpRequest*
@@ -36,47 +37,85 @@ http_request_new(GIOChannel* io_channel, GError** error)
       return NULL;
     }
 
+  gchar* request = _http_request_read_request(io_channel, &local_error);
+  if (request == NULL) {
+    g_propagate_error(error, local_error);
+    g_error_free(local_error);
+    free(this);
+    return NULL;
+  }
 
-  /* get the old delimiter */
-  gint old_delimiter_length;
-  const gchar* old_delimiter =
-    g_io_channel_get_line_term(io_channel, &old_delimiter_length);
+  this->_raw_request = request;
 
-  /* make the io channel search for the end of the whole http request */
-  g_io_channel_set_line_term(io_channel, "\r\n\r\n", 4);
-
-  /* read the whole request as one "line" */
-  GIOStatus status = g_io_channel_read_line(io_channel, &this->_raw_request,
-                                            NULL, NULL, &local_error);
-  if (status == G_IO_STATUS_ERROR)
+  if (!_http_request_parse_raw_request(this, &local_error))
     {
       g_propagate_error(error, local_error);
       g_error_free(local_error);
       free(this);
       return NULL;
     }
-  else if (status == G_IO_STATUS_EOF)
-    { /* EOF file should not be possible */
-      g_set_error(error, HTTP_MACHINE_ERROR,
-                  HTTP_MACHINE_ERROR_INIT,
-                  "EOF reached to early when parsing the HttpRequest");
-      g_error_free(local_error);
-      free(this);
-      return NULL;
-    }
-
-  // reset the old delimiter
-  g_io_channel_set_line_term(io_channel,old_delimiter,old_delimiter_length);
 
   return this;
 }
 
-gboolean
-http_request_destroy(HttpRequest* this, GError** error)
+void
+http_request_destroy(HttpRequest* this)
 {
   free(this->_raw_request);
   free(this);
+}
+
+gchar*
+_http_request_read_request(GIOChannel* io_channel, GError** error)
+{
+
+  gchar* request = NULL;
+  GError* local_error = NULL;
+
+  /* get the old delimiter */
+   gint old_delimiter_length;
+   const gchar* old_delimiter =
+     g_io_channel_get_line_term(io_channel, &old_delimiter_length);
+
+   /* make the io channel search for the end of the whole http request */
+   g_io_channel_set_line_term(io_channel, "\r\n\r\n", 4);
+
+   /* read the whole request as one "line" */
+   GIOStatus status = g_io_channel_read_line(io_channel, &request,
+                                             NULL, NULL, &local_error);
+   if (status == G_IO_STATUS_ERROR)
+     {
+       g_propagate_error(error, local_error);
+       g_error_free(local_error);
+       return NULL;
+     }
+   else if (status == G_IO_STATUS_EOF)
+     { /* EOF file should not be possible */
+       g_set_error(error, HTTP_MACHINE_ERROR,
+                   HTTP_MACHINE_ERROR_INIT,
+                   "EOF reached to early when parsing the HttpRequest");
+       g_error_free(local_error);
+       return NULL;
+     }
+
+   // reset the old delimiter
+   g_io_channel_set_line_term(io_channel,old_delimiter,old_delimiter_length);
+
+
+   return request;
+}
+
+gboolean
+_http_request_parse_raw_request(HttpRequest* this, GError** error)
+{
+  GError* local_error = NULL;
+
+  gchar** request_lines = g_strsplit_set(this->_raw_request, "\r\n", 0);
+
+  gchar* current_line = *request_lines;
+  printf("request: %s\n", current_line);
+
+  g_strfreev(request_lines);
 
   return TRUE;
 }
-

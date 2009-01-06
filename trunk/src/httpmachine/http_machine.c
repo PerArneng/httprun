@@ -79,15 +79,16 @@ _handler_thread_function(gpointer data, gpointer user_data)
   HttpClientConnection* client = (HttpClientConnection*)data;
 
 
-  HttpRequest* http_request = http_request_new(client->io_channel,&local_error);
+  HttpRequest* http_request = http_request_new(client->io_channel,
+                                               &local_error);
   if(http_request == NULL)
     {
-      fprintf(stderr,"failed to read request: %s\n",local_error->message);
+      fprintf(stderr, "failed to read request: %s\n", local_error->message);
       g_error_free(local_error);
       return;
     }
 
-  printf("%s",http_request->_raw_request);
+  /* printf("%s",http_request->_raw_request); */
 
   char* temp_message = "HTTP/1.0 200 OK\r\nConnection: close\r\n\r\n"
     "<html><body style='background-color: blue;'><h1 style='color: white;'>"
@@ -112,12 +113,7 @@ _handler_thread_function(gpointer data, gpointer user_data)
     }
 
 
-  if(!http_request_destroy(http_request,&local_error)) {
-    fprintf(stderr,"could destroy http request: %s\n",
-            local_error->message);
-    g_error_free(local_error);
-    return;
-  }
+  http_request_destroy(http_request);
 
   if(!http_client_connection_destroy(client, &local_error)) {
     fprintf(stderr,"could not shutdown client socket: %s\n",
@@ -171,8 +167,8 @@ http_machine_new(uint16_t port, GError** error)
   if (engine == NULL)
     {
       g_set_error(error, HTTP_MACHINE_ERROR,
-      HTTP_MACHINE_ERROR_INIT, "could not allocate the engine: %s", g_strerror(
-          errno));
+      HTTP_MACHINE_ERROR_INIT, "could not allocate the engine: %s",
+      g_strerror(errno));
       return NULL;
     }
 

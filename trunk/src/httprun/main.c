@@ -1,5 +1,5 @@
 /* --
- * Copyright (C) 2009 Per Arneng
+ * Copyright (C) 2009 Per Arneng <per dot arneng (a) anyplanet dot com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License

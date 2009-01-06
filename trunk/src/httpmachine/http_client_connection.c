@@ -26,8 +26,10 @@ HttpClientConnection*
 http_client_connection_new(int socket, struct sockaddr_in* addr, GError** error)
 {
   GError* local_error = NULL;
+  HttpClientConnection* this = NULL;
+  GIOStatus io_status;
 
-  HttpClientConnection* this = malloc(sizeof(HttpClientConnection));
+  this = malloc(sizeof(HttpClientConnection));
   if (this == NULL)
     {
       g_set_error(error, HTTP_MACHINE_ERROR,
@@ -55,8 +57,8 @@ http_client_connection_new(int socket, struct sockaddr_in* addr, GError** error)
 
   this->io_channel = g_io_channel_unix_new(this->socket);
 
-  GIOStatus status = g_io_channel_set_encoding(this->io_channel, NULL, NULL);
-  if (status != G_IO_STATUS_NORMAL)
+  io_status = g_io_channel_set_encoding(this->io_channel, NULL, NULL);
+  if (io_status != G_IO_STATUS_NORMAL)
     {
       g_propagate_error(error, local_error);
       g_error_free(local_error);
