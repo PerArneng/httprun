@@ -24,9 +24,19 @@
 
 #include "http_machine.h"
 
+typedef enum {
+  REQUEST_METHOD_UNKNOWN,
+  REQUEST_METHOD_GET,
+  REQUEST_METHOD_POST,
+  REQUEST_METHOD_PUT,
+  REQUEST_METHOD_HEAD,
+  REQUEST_METHOD_DELETE
+} RequestMethod;
+
+
 typedef struct {
 
-  char* method;
+  RequestMethod method;
   char* uri;
   char* protocol_version;
 
@@ -41,14 +51,6 @@ http_request_new(GIOChannel* io_channel, GError** error);
 
 void
 http_request_destroy(HttpRequest* this);
-
-/* private */
-
-gchar*
-_http_request_read_request(GIOChannel* io_channel, GError** error);
-
-gboolean
-_http_request_parse_raw_request(HttpRequest* this, GError** error);
 
 
 #endif /* HTTP_REQUEST_H_ */

@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "http_request.h"
+#include "http_request_private.h"
 
 HttpRequest*
 http_request_new(GIOChannel* io_channel, GError** error)
@@ -107,16 +108,35 @@ _http_request_read_request(GIOChannel* io_channel, GError** error)
    return request;
 }
 
+RequestMethod
+_http_request_get_request_method(gchar* method) {
+
+  if(g_strcmp0(method,"GET") == 0) {
+    return REQUEST_METHOD_GET;
+  } else if(g_strcmp0(method,"POST") == 0){
+    return REQUEST_METHOD_POST;
+  } else {
+    /* FIXME: ADD SUPPORT FOR MORE METHODS */
+    return REQUEST_METHOD_UNKNOWN;
+  }
+
+}
+
 gboolean
 _http_request_parse_raw_request(HttpRequest* this, GError** error)
 {
   GError* local_error = NULL;
+  gchar** request_lines = NULL;
+  gchar** first_line_items = NULL;
 
-  gchar** request_lines = g_strsplit_set(this->_raw_request, "\r\n", 0);
+  request_lines = g_strsplit_set(this->_raw_request, "\r\n", 0);
+  first_line_items = g_strsplit_set(*request_lines, " ", 0);
 
-  gchar* current_line = *request_lines;
-  printf("request: %s\n", current_line);
+  this->method = _http_request_get_request_method( *first_line_items );
+  this->uri = g_strdup( *(first_line_items + 1) );
+  this->protocol_version = g_strdup( *(first_line_items + 2) );
 
+  g_strfreev(first_line_items);
   g_strfreev(request_lines);
 
   return TRUE;

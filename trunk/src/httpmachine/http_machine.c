@@ -95,7 +95,10 @@ _handler_thread_function(gpointer data, gpointer user_data)
       return;
     }
 
-  /* printf("%s",http_request->_raw_request); */
+  /*
+  printf("request-> %d, %s, %s\n", http_request->method,
+         http_request->uri,
+         http_request->protocol_version); */
 
   temp_message = "HTTP/1.0 200 OK\r\nConnection: close\r\n\r\n"
     "<html><body style='background-color: blue;'><h1 style='color: white;'>"
