@@ -17,18 +17,31 @@
  * --
  */
 
-#include "http_request.h"
+#ifndef HTTP_SERVICE_H_
+#define HTTP_SERVICE_H_
 
-#ifndef HTTP_REQUEST_PRIVATE_H_
-#define HTTP_REQUEST_PRIVATE_H_
+#include <glib-2.0/glib.h>
 
-gchar*
-_http_request_read_request(GIOChannel* io_channel, GError** error);
+
+typedef enum {
+  TARGET_TYPE_PATH,
+  TARGET_TYPE_PROCESS
+} TargetType;
+
+typedef struct {
+  gchar* url;
+  gchar* target;
+  TargetType target_type;
+  gchar* mimetype;
+} HttpService;
+
+
+HttpService*
+http_service_new(gchar* url, gchar* target, TargetType type,
+                  gchar* mimetype, GError** error);
 
 gboolean
-_http_request_parse_raw_request(HttpRequest* this, GError** error);
+http_service_destroy(HttpService* this);
 
-RequestMethod
-_http_request_get_request_method(gchar* method);
 
-#endif /* HTTP_REQUEST_PRIVATE_H_ */
+#endif /* HTTP_SERVICE_H_ */

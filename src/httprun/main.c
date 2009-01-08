@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <http_machine.h>
+#include <http_service.h>
 
 int
 main(int argc, char** argv)
@@ -34,6 +35,14 @@ main(int argc, char** argv)
   if (http_machine == NULL)
     {
       fprintf(stderr,"could not create the http engine: %s\n", error->message);
+      g_error_free(error);
+      return (EXIT_FAILURE);
+    }
+
+  if (!http_service_new("/", "Makefile.am", TARGET_TYPE_PATH, "text/text",
+                        &error) )
+    {
+      fprintf(stderr,"could not add the http service: %s\n", error->message);
       g_error_free(error);
       return (EXIT_FAILURE);
     }
