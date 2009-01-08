@@ -23,6 +23,8 @@
 #include <stdint.h>
 #include <errno.h>
 
+#include "http_service.h"
+
 #define HTTP_MACHINE_ERROR http_machine_error_quark()
 
 GQuark
@@ -69,6 +71,14 @@ typedef struct
  */
 HttpMachine*
 http_machine_new(uint16_t port, GError** error);
+
+gboolean
+http_machine_add_service(HttpMachine* this, gchar* url,
+                         gchar* target, TargetType target_type,
+                         gchar* mimetype,
+                         GError** error);
+
+void t(TargetType xx);
 
 gboolean
 http_machine_start(HttpMachine* this, GError** error);

@@ -134,6 +134,27 @@ _handler_thread_function(gpointer data, gpointer user_data)
 
 }
 
+gboolean
+http_machine_add_service(HttpMachine* this, gchar* url, gchar* target,
+                         TargetType target_type, gchar* mimetype,
+                         GError** error)
+{
+  GError* local_error = NULL;
+  HttpService* http_service = http_service_new(url, target, target_type,
+                                               mimetype,
+                                               &local_error);
+  if (http_service == NULL)
+    {
+      g_propagate_error(error, local_error);
+      g_error_free(local_error);
+      return FALSE;
+    }
+
+  /* FIXME: IMPLEMENT ME */
+
+  return TRUE;
+}
+
 int
 _create_socket(uint16_t port, GError** error)
 {
