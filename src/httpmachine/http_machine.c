@@ -159,16 +159,16 @@ int
 _create_socket(uint16_t port, GError** error)
 {
 
-  int sock = -1;
+  int socket_object = -1;
   struct sockaddr_in name;
 
   /* create the socket */
-  sock = socket(PF_INET,SOCK_STREAM, 0);
-  if (sock < 0)
+  socket_object = socket(PF_INET,SOCK_STREAM, 0);
+  if (socket_object < 0)
     {
       g_set_error(error, HTTP_MACHINE_ERROR,
-      HTTP_MACHINE_ERROR_INIT, "could not create the socket: %s", g_strerror(
-          errno));
+                  HTTP_MACHINE_ERROR_INIT, "could not create the socket: %s",
+                  g_strerror(errno));
       return -1;
     }
 
@@ -177,7 +177,7 @@ _create_socket(uint16_t port, GError** error)
   name.sin_port = htons(port);
   name.sin_addr.s_addr = htonl(INADDR_ANY);
 
-  if (bind(sock, (struct sockaddr *) &name, sizeof(name)) < 0)
+  if (bind(socket_object, (struct sockaddr *) &name, sizeof(name)) < 0)
     {
       g_set_error(error, HTTP_MACHINE_ERROR,
       HTTP_MACHINE_ERROR_INIT, "could not bind the socket: %s",
@@ -185,7 +185,7 @@ _create_socket(uint16_t port, GError** error)
       return -1;
     }
 
-  return sock;
+  return socket_object;
 }
 
 HttpMachine*
@@ -226,7 +226,6 @@ http_machine_destroy(HttpMachine* this, GError** error)
 
   g_return_val_if_fail(this != NULL, TRUE);
 
-
   status = shutdown(this->socket, 2);
   if (status < 0)
     {
@@ -235,6 +234,8 @@ http_machine_destroy(HttpMachine* this, GError** error)
           errno));
       return FALSE;
     }
+
+  /* FIXME: STOP AND FREE THE THREAD POOL */
 
   g_free(this);
 

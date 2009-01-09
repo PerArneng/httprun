@@ -39,7 +39,7 @@ interrupt_handler(int signal_number) {
         }
     }
 
-  /* restore the default signal handler*/
+  /* restore the default signal handler */
   signal(signal_number, SIG_DFL);
 
   /* call the default signal handler */
@@ -69,32 +69,25 @@ main(int argc, char** argv)
   http_machine = http_machine_new(8080, &error);
   if (http_machine == NULL)
     {
-      fprintf(stderr,"could not create the http engine: %s\n", error->message);
-      g_error_free(error);
-      return (EXIT_FAILURE);
+      g_error("could not create the HttpMachine: %s\n", error->message);
     }
 
+  /* TEST SERVICE */
   if (!http_service_new("/", "Makefile.am", TARGET_TYPE_PATH, "text/plain",
                         &error) )
     {
-      fprintf(stderr,"could not add the http service: %s\n", error->message);
-      g_error_free(error);
-      return (EXIT_FAILURE);
+      g_error("could not add the test HttpService: %s\n", error->message);
     }
 
   if (!http_machine_start(http_machine, &error))
     {
-      fprintf(stderr,"could not start the http engine: %s\n", error->message);
-      g_error_free(error);
-      return (EXIT_FAILURE);
+      g_error("could not start the HttpMachine: %s\n", error->message);
     }
 
   if (!http_machine_destroy(http_machine, &error))
     {
-      fprintf(stderr,"could not destroy the http engine: %s\n",
+      g_error("could not destroy the HttpMachine: %s\n",
               error->message);
-      g_error_free(error);
-      return (EXIT_FAILURE);
     }
 
   return (EXIT_SUCCESS);
