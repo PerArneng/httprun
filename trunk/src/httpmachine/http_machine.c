@@ -222,8 +222,12 @@ http_machine_new(uint16_t port, GError** error)
 gboolean
 http_machine_destroy(HttpMachine* this, GError** error)
 {
+  int status = -1;
 
-  int status = shutdown(this->socket, 2);
+  g_return_val_if_fail(this != NULL, TRUE);
+
+
+  status = shutdown(this->socket, 2);
   if (status < 0)
     {
       g_set_error(error, HTTP_MACHINE_ERROR,

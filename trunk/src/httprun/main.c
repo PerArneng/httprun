@@ -19,16 +19,51 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <http_machine.h>
 #include <http_service.h>
+
+
+HttpMachine* http_machine;
+
+void
+interrupt_handler(int signal_number) {
+
+  GError* local_error;
+
+  if (http_machine != NULL)
+    {
+      if(!http_machine_destroy(http_machine, &local_error))
+        {
+          g_warning("could not destroy the HttpMachine on interrupt!");
+        }
+    }
+
+  /* restore the default signal handler*/
+  signal(signal_number, SIG_DFL);
+
+  /* call the default signal handler */
+  raise(signal_number);
+}
+
+void
+setup_interrupt_handler()
+{
+  if (signal (SIGINT, interrupt_handler) == SIG_IGN)
+    signal (SIGINT, SIG_IGN);
+  if (signal (SIGHUP, interrupt_handler) == SIG_IGN)
+    signal (SIGHUP, SIG_IGN);
+  if (signal (SIGTERM, interrupt_handler) == SIG_IGN)
+    signal (SIGTERM, SIG_IGN);
+}
 
 int
 main(int argc, char** argv)
 {
 
   GError* error = NULL;
-  HttpMachine* http_machine = NULL;
 
+  setup_interrupt_handler();
   g_thread_init(NULL);
 
   http_machine = http_machine_new(8080, &error);
@@ -39,7 +74,7 @@ main(int argc, char** argv)
       return (EXIT_FAILURE);
     }
 
-  if (!http_service_new("/", "Makefile.am", TARGET_TYPE_PATH, "text/text",
+  if (!http_service_new("/", "Makefile.am", TARGET_TYPE_PATH, "text/plain",
                         &error) )
     {
       fprintf(stderr,"could not add the http service: %s\n", error->message);
@@ -56,7 +91,7 @@ main(int argc, char** argv)
 
   if (!http_machine_destroy(http_machine, &error))
     {
-      fprintf(stderr,"could not start destroy http engine: %s\n",
+      fprintf(stderr,"could not destroy the http engine: %s\n",
               error->message);
       g_error_free(error);
       return (EXIT_FAILURE);
