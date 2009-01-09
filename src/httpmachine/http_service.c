@@ -8,8 +8,9 @@ http_service_new(gchar* url, gchar* target, TargetType type,
                   gchar* mimetype, GError** error)
 {
 
-  HttpService* this = g_malloc(sizeof(HttpService));
+  HttpService* this = NULL;
 
+  this = g_malloc(sizeof(HttpService));
   this->url = g_strdup(url);
   this->target = g_strdup(target);
   this->target_type = type;
