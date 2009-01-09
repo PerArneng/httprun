@@ -29,21 +29,13 @@ http_request_new(GIOChannel* io_channel, GError** error)
   GError* local_error = NULL;
   gchar* request = NULL;
 
-  HttpRequest* this = malloc(sizeof(HttpRequest));
-  if(this == NULL)
-    {
-      g_set_error(error, HTTP_MACHINE_ERROR,
-                  HTTP_MACHINE_ERROR_INIT,
-                  "could not allocate the HttpRequest object: %s",
-                  g_strerror(errno));
-      return NULL;
-    }
+  HttpRequest* this = g_malloc(sizeof(HttpRequest));
 
   request = _http_request_read_request(io_channel, &local_error);
   if (request == NULL) {
     g_propagate_error(error, local_error);
     g_error_free(local_error);
-    free(this);
+    g_free(this);
     return NULL;
   }
 
@@ -53,7 +45,7 @@ http_request_new(GIOChannel* io_channel, GError** error)
     {
       g_propagate_error(error, local_error);
       g_error_free(local_error);
-      free(this);
+      g_free(this);
       return NULL;
     }
 
@@ -63,8 +55,8 @@ http_request_new(GIOChannel* io_channel, GError** error)
 void
 http_request_destroy(HttpRequest* this)
 {
-  free(this->_raw_request);
-  free(this);
+  g_free(this->_raw_request);
+  g_free(this);
 }
 
 gchar*

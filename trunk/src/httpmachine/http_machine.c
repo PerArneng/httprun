@@ -194,20 +194,13 @@ http_machine_new(uint16_t port, GError** error)
 
   GError* local_error = NULL;
 
-  HttpMachine* engine = (HttpMachine*) malloc(sizeof(HttpMachine));
-  if (engine == NULL)
-    {
-      g_set_error(error, HTTP_MACHINE_ERROR,
-      HTTP_MACHINE_ERROR_INIT, "could not allocate the engine: %s",
-      g_strerror(errno));
-      return NULL;
-    }
+  HttpMachine* engine = (HttpMachine*) g_malloc(sizeof(HttpMachine));
 
   engine->port = port;
   engine->socket = _create_socket(port, &local_error);
   if (engine->socket < 0)
     {
-      free(engine);
+      g_free(engine);
       g_propagate_error(error, local_error);
       g_error_free(local_error);
       return NULL;
@@ -217,7 +210,7 @@ http_machine_new(uint16_t port, GError** error)
       NULL, 10, TRUE, &local_error);
   if (engine->handler_thread_pool == NULL)
     {
-      free(engine);
+      g_free(engine);
       g_propagate_error(error, local_error);
       g_error_free(local_error);
       return NULL;
@@ -239,7 +232,7 @@ http_machine_destroy(HttpMachine* this, GError** error)
       return FALSE;
     }
 
-  free(this);
+  g_free(this);
 
   return TRUE;
 }

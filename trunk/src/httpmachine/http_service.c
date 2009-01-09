@@ -8,15 +8,7 @@ http_service_new(gchar* url, gchar* target, TargetType type,
                   gchar* mimetype, GError** error)
 {
 
-  HttpService* this = malloc(sizeof(HttpService));
-  if(this == NULL)
-    {
-      g_set_error(error, HTTP_MACHINE_ERROR,
-                  HTTP_MACHINE_ERROR_INIT,
-                  "could not allocate a HttpServicet: %s",
-                   g_strerror(errno));
-      return NULL;
-    }
+  HttpService* this = g_malloc(sizeof(HttpService));
 
   this->url = g_strdup(url);
   this->target = g_strdup(target);
@@ -30,10 +22,10 @@ http_service_new(gchar* url, gchar* target, TargetType type,
 gboolean
 http_service_destroy(HttpService* this)
 {
-  free(this->url);
-  free(this->target);
-  free(this->mimetype);
-  free(this);
+  g_free(this->url);
+  g_free(this->target);
+  g_free(this->mimetype);
+  g_free(this);
 
   return TRUE;
 }
