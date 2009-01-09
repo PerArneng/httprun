@@ -29,28 +29,9 @@ http_client_connection_new(int socket, struct sockaddr_in* addr, GError** error)
   HttpClientConnection* this = NULL;
   GIOStatus io_status;
 
-  this = malloc(sizeof(HttpClientConnection));
-  if (this == NULL)
-    {
-      g_set_error(error, HTTP_MACHINE_ERROR,
-                  HTTP_MACHINE_ERROR_INIT,
-                  "failed to allocate an HttpClientConnection object: %s",
-                  g_strerror(errno));
-      return NULL;
-    }
-
+  this = g_malloc(sizeof(HttpClientConnection));
+  this->ip_address = g_malloc(sizeof(char) * IP_ADDRESS_LENGTH);
   this->socket = socket;
-
-  this->ip_address = malloc(sizeof(char) * IP_ADDRESS_LENGTH);
-  if(this->ip_address == NULL)
-    {
-      g_set_error(error, HTTP_MACHINE_ERROR,
-                  HTTP_MACHINE_ERROR_INIT,
-                  "failed to allocate an ip address object: %s",
-                  g_strerror(errno));
-      free(this);
-      return NULL;
-    }
 
   inet_ntop(AF_INET, (void*) &addr->sin_addr, this->ip_address,
             IP_ADDRESS_LENGTH);
@@ -62,8 +43,8 @@ http_client_connection_new(int socket, struct sockaddr_in* addr, GError** error)
     {
       g_propagate_error(error, local_error);
       g_error_free(local_error);
-      free(this->ip_address);
-      free(this);
+      g_free(this->ip_address);
+      g_free(this);
       return NULL;
     }
 
@@ -88,8 +69,8 @@ http_client_connection_destroy(HttpClientConnection* this, GError** error)
 
   g_io_channel_unref(this->io_channel);
 
-  free(this->ip_address);
-  free(this);
+  g_free(this->ip_address);
+  g_free(this);
 
   return TRUE;
 }
